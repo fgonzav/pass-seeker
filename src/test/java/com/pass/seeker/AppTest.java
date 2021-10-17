@@ -4,11 +4,21 @@
 package com.pass.seeker;
 
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
 
 class AppTest {
-    @Test void appHasAGreeting() {
-        App classUnderTest = new App();
-        assertNotNull(classUnderTest.getGreeting(), "app should have a greeting");
+    @Test
+    void test(){
+        //String a = "";
+        String b = "a";
+        String c = "as";
+        String d = "asf";
+        String e = "asdfghjkl";
+
+        System.out.println(c.charAt(c.length()-1));
+        System.out.println(d.charAt(d.length()-1));
+        System.out.println(e.charAt(e.length()-1));
+        System.out.println(b.charAt(b.length()-1));
+        //System.out.println(a.charAt(a.length()-1));
     }
 }
+
