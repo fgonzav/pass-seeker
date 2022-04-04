@@ -19,7 +19,7 @@ public class PasswordGenerator {
     @Getter
     private volatile String lastUsed;
 
-    private final AtomicInteger lastUsedLenght = new AtomicInteger(1);
+    private final AtomicInteger lastUsedLength = new AtomicInteger(1);
 
     private static volatile PasswordGenerator passwordGenerator;
 
@@ -49,13 +49,13 @@ public class PasswordGenerator {
         if (hasNext()){
             Character next = getNextCharacter(lastUsed);
             if(StringUtils.isEmpty(lastUsed)){
-                return Optional.of(String.valueOf(next).repeat(lastUsedLenght.get()));
+                return Optional.of(String.valueOf(next).repeat(lastUsedLength.get()));
             } else {
                 for(int i = lastUsed.length()-1 ;i >= 0 ; i--){
                     char toReplace = lastUsed.charAt(i);
                     if(toReplace != characters[characters.length-1]){
                         String base = lastUsed.substring(0,i)+getNextCharacter(toReplace);
-                        return Optional.of(base+characters[0].toString().repeat(lastUsedLenght.get()-base.length()));
+                        return Optional.of(base+characters[0].toString().repeat(lastUsedLength.get()-base.length()));
                     }
                 }
             }
@@ -64,8 +64,8 @@ public class PasswordGenerator {
     }
 
     private void updateState(String generatedPassword){
-        if(String.valueOf(characters[characters.length-1]).repeat(lastUsedLenght.get()).equals(generatedPassword)){
-            lastUsedLenght.addAndGet(1);
+        if(String.valueOf(characters[characters.length-1]).repeat(lastUsedLength.get()).equals(generatedPassword)){
+            lastUsedLength.addAndGet(1);
             lastUsed = null;
         } else {
             lastUsed = generatedPassword;
@@ -73,7 +73,7 @@ public class PasswordGenerator {
     }
 
     private boolean hasNext(){
-        return lastUsedLenght.get() <= getPasswordMaxLength();
+        return lastUsedLength.get() <= getPasswordMaxLength();
     }
 
     private Integer getPasswordMaxLength(){
@@ -118,7 +118,7 @@ public class PasswordGenerator {
             synchronized (PasswordGenerator.class) {
                 if (this.lastUsed == null) {
                     this.lastUsed = lastUsed;
-                    this.lastUsedLenght.set(lastUsed.length());
+                    this.lastUsedLength.set(lastUsed.length());
                 }
             }
         }

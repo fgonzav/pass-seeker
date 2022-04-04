@@ -7,4 +7,6 @@ public class PasswordConstants {
     public static final String RESULT_FILE = "./result.txt";
 
     public static final String UNRAR_SCRIPT = "unrar.sh";
+
+    public static final String UNRAR_SCRIPT_WIN = "unrar.cmd";
 }

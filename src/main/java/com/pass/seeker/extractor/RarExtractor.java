@@ -15,6 +15,8 @@ import java.util.Properties;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 
+import static com.pass.seeker.constant.PasswordConstants.UNRAR_SCRIPT;
+import static com.pass.seeker.constant.PasswordConstants.UNRAR_SCRIPT_WIN;
 import static com.pass.seeker.util.FileUtils.createDirIfNotExists;
 
 @Slf4j
@@ -27,24 +29,22 @@ public class RarExtractor {
     private static RarExtractor extractor;
 
     private RarExtractor(){
-        if (isWindows()) {
-            throw new UnsupportedOperationException("not yet");
-        } else {
-            try {
-                createDirIfNotExists(application.getProperty("temp.dir"));
-                String scriptPath = String.format("%s/%s",application.getProperty("temp.dir"), PasswordConstants.UNRAR_SCRIPT);
-                if(!Files.exists(Paths.get(scriptPath))){
-                    InputStream is = RarExtractor.class.getClassLoader().getResourceAsStream("scripts/unrar.sh");
-                    //Path script = Files.createFile(Paths.get(String.format("%s/%s",application.getProperty("temp.dir"), PasswordConstants.UNRAR_SCRIPT)));
-                    this.unrarScript = FileUtils.createFile(scriptPath, new String(is.readAllBytes()));
-                } else {
-                    this.unrarScript = Paths.get(scriptPath);
-                }
+        createDirIfNotExists(application.getProperty("temp.dir"));
+        String script = isWindows()?UNRAR_SCRIPT_WIN:UNRAR_SCRIPT;
+
+        try {
+            String scriptPath = String.format("%s/%s",application.getProperty("temp.dir"), script);
+            if(!Files.exists(Paths.get(scriptPath))){
+                InputStream is = RarExtractor.class.getClassLoader().getResourceAsStream("scripts/"+script);
+                //Path script = Files.createFile(Paths.get(String.format("%s/%s",application.getProperty("temp.dir"), PasswordConstants.UNRAR_SCRIPT)));
+                this.unrarScript = FileUtils.createFile(scriptPath, new String(is.readAllBytes()));
+            } else {
+                this.unrarScript = Paths.get(scriptPath);
             }
-            catch (Exception e){
-                log.error("[extractWithPassword] Cannot find script",e);
-                throw new ExtractorException(e);
-            }
+        }
+        catch (Exception e){
+            log.error("[extractWithPassword] Cannot find script",e);
+            throw new ExtractorException(e);
         }
     }
 
