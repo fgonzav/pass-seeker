@@ -1,12 +1,17 @@
 package com.pass.seeker.extractor;
 
+import static com.pass.seeker.constant.PasswordConstants.UNRAR_SCRIPT;
+import static com.pass.seeker.constant.PasswordConstants.UNRAR_SCRIPT_WIN;
+import static com.pass.seeker.util.FileUtils.createDirIfNotExists;
+
 import com.pass.seeker.configuration.PropertiesFactory;
-import com.pass.seeker.constant.PasswordConstants;
 import com.pass.seeker.exception.ExtractorException;
 import com.pass.seeker.util.FileUtils;
-import lombok.extern.slf4j.Slf4j;
-
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -14,10 +19,7 @@ import java.nio.file.Paths;
 import java.util.Properties;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
-
-import static com.pass.seeker.constant.PasswordConstants.UNRAR_SCRIPT;
-import static com.pass.seeker.constant.PasswordConstants.UNRAR_SCRIPT_WIN;
-import static com.pass.seeker.util.FileUtils.createDirIfNotExists;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class RarExtractor {
@@ -30,16 +32,17 @@ public class RarExtractor {
 
     private RarExtractor(){
         createDirIfNotExists(application.getProperty("temp.dir"));
-        String script = isWindows()?UNRAR_SCRIPT_WIN:UNRAR_SCRIPT;
-
-        try {
-            String scriptPath = String.format("%s/%s",application.getProperty("temp.dir"), script);
-            if(!Files.exists(Paths.get(scriptPath))){
-                InputStream is = RarExtractor.class.getClassLoader().getResourceAsStream("scripts/"+script);
+        String scriptName = isWindows()?UNRAR_SCRIPT_WIN:UNRAR_SCRIPT;
+        try(var script = RarExtractor.class.getClassLoader().getResourceAsStream("scripts/"+scriptName)) {
+            log.info("[RarExtractor] script: "+script);
+            Path scriptPath = Paths.get(String.format("%s/%s",application.getProperty("temp.dir"), scriptName));
+            log.info("[RarExtractor] scriptPath: "+scriptPath);
+            if(!Files.exists(scriptPath)){
                 //Path script = Files.createFile(Paths.get(String.format("%s/%s",application.getProperty("temp.dir"), PasswordConstants.UNRAR_SCRIPT)));
-                this.unrarScript = FileUtils.createFile(scriptPath, new String(is.readAllBytes()));
+                assert script != null;
+                this.unrarScript = FileUtils.createFile(scriptPath.toAbsolutePath().toString(), new String(script.readAllBytes()));
             } else {
-                this.unrarScript = Paths.get(scriptPath);
+                this.unrarScript = scriptPath;
             }
         }
         catch (Exception e){
@@ -67,7 +70,7 @@ public class RarExtractor {
     public boolean extractWithPassword(String rarPath, String dest, String password){
 
         ProcessBuilder builder = new ProcessBuilder();
-        String commandScript = String.format("%s %s %s %s",unrarScript.toAbsolutePath().toString() , password, rarPath, dest);
+        String commandScript = String.format("%s %s %s %s",unrarScript.toAbsolutePath() , password, rarPath, dest);
         log.debug("[extractWithPassword] commandScript: "+commandScript);
         builder.command("sh", "-c", commandScript);
         builder.directory(new File("."));

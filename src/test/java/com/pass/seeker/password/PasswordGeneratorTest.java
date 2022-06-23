@@ -1,15 +1,13 @@
 package com.pass.seeker.password;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.Optional;
+import java.util.regex.Pattern;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 class PasswordGeneratorTest {
-
-    /*@BeforeEach
-    public void setup(){
-        ReflectionUtils.
-    }*/
 
     @Test
     public void generateConsecutivePasswords(){
@@ -25,8 +23,7 @@ class PasswordGeneratorTest {
     }
 
 
-
-    /*@Test
+    @Test
     public void shouldReturnEmptyAfterAllCombinationsAreReturned(){
         System.setProperty("dictionary","a07");
         System.setProperty("maxLength","2");
@@ -62,5 +59,21 @@ class PasswordGeneratorTest {
         assertEquals("70", p11);
         assertEquals("77", p12);
         assertEquals(Optional.empty(),empty);
-    }*/
+    }
+
+    @Test
+    void shouldGeneratePassword(){
+        var passwordGenerator = PasswordGenerator.getInstance();
+        var optPasswd = passwordGenerator.getNext();
+        var wasFounded = false;
+        while(optPasswd.isPresent()){
+            var passwd = optPasswd.get();
+            if(passwd.matches(Pattern.quote("983."))){
+                wasFounded = true;
+                break;
+            }
+            optPasswd = passwordGenerator.getNext();
+        }
+        assertTrue(wasFounded);
+    }
 }
